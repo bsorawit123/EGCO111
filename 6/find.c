@@ -20,30 +20,43 @@ int main() {
     scanf("%d", &k);
 
     if(k == -100) break;
-    while(1) {
-      mid = (low+high)/2;
-
+    while(low <= high) {
+      mid = (low+high) / 2;
       if(arr[mid] == k) {
         printf("Position is %d\n", mid);
         break;
       } else if(arr[mid] > k) {
         high = mid - 1;
-      } else if(arr[mid] < k) {
+      } else {
         low = mid + 1;
-      }  
-
-      if(high - low == 1 || high - low == -1) {
-        if(arr[high] == k) {
-          printf("Position is %d\n", high);
-        } else if(arr[low] == k) {
-          printf("Position is %d\n", low);
-        } else {
-          printf("Not found!\n");
-        }
-        break;
-      };
+      }
+    }
+    if(low > high) {
+      printf("Not found!\n");
     }
   }
+
+    // while(1) {
+    //   mid = (low+high)/2;
+    //   if(arr[mid] == k) {
+    //     printf("Position is %d\n", mid);
+    //     break;
+    //   } else if(arr[mid] > k) {
+    //     high = mid - 1;
+    //   } else if(arr[mid] < k) {
+    //     low = mid + 1;
+    //   }  
+    //   if(high - low == 1 || high - low == -1) {
+    //     if(arr[high] == k) {
+    //       printf("Position is %d\n", high);
+    //     } else if(arr[low] == k) {
+    //       printf("Position is %d\n", low);
+    //     } else {
+    //       printf("Not found!\n");
+    //     }
+    //     break;
+    //   };
+    // }
 
   return 0;
 }
