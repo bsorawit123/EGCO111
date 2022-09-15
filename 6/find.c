@@ -23,7 +23,7 @@ int main() {
     while(low <= high) {
       mid = (low+high) / 2;
       if(arr[mid] == k) {
-        printf("Position is %d\n", mid);
+        printf("Position is %d\n", mid+1); // From question position = index + 1
         break;
       } else if(arr[mid] > k) {
         high = mid - 1;
