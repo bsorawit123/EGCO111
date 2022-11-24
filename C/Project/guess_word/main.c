@@ -156,9 +156,9 @@ void win_lose(char answer[], int count_game, char type[], int *players) {
 void check_str(char answer_text[]) {
   char temp[strlen(answer_text)-1];
   for(int i = 0 ; i < strlen(answer_text)-1; i++) {
-    // if(answer_text[0] == '\n') {
-    //   temp[i] = answer_text[i+1];
-    // }
+    if(answer_text[0] == '\n') {
+      temp[i] = answer_text[i+1];
+    }
     if(answer_text[strlen(answer_text)-1] == '\n') {
       temp[i] = answer_text[i];
     }
@@ -250,10 +250,18 @@ void print_defi(char answer[], char answer_txt[], int *players) {
   }
 }
 
+int num_in_guess(char guess[]) {
+  int num_in_guess = 0;
+  for(int i = 0; i < strlen(guess); i++) {
+    if(isdigit(guess[i]) == 1) num_in_guess++;
+  }
+  return num_in_guess;
+}
+
 void game(int *players, int *n) {
   srand(time(NULL));
   int lines = checkLines("words.txt");
-  int count_game = 0;
+  int count_game = 0, check_guess;
   char guess[6];
   char answer[10], answer_text[1024];
   random_word("words.txt", lines, answer, answer_text);
@@ -264,18 +272,25 @@ void game(int *players, int *n) {
 
   do {
     do {
-      if(*players ==  1) {
-        printf("\n%s guess: ", player1.name);
-      } else if(*players == 2) {
-        if(count_game % 2 == 0) {
+      do {
+        fflush(stdin);
+        if(*players ==  1) {
           printf("\n%s guess: ", player1.name);
-        } else {
-          printf("\n%s guess: ", player2.name);
+        } else if(*players == 2) {
+          if(count_game % 2 == 0) {
+            printf("\n%s guess: ", player1.name);
+          } else {
+            printf("\n%s guess: ", player2.name);
+          }
         }
-      }
-      fflush(stdin);
-      scanf("%s", guess);
-      if(strlen(guess) != 5) printf("\n << only 5 letters >>\n");
+        scanf("%s", guess);
+        check_guess = num_in_guess(guess);
+        if(check_guess != 0) {
+          printf("\n<<   NO NUMBER!   >>\n");
+          printf("<< ONLY 5 LETTERS >>\n");
+        }
+      } while(check_guess != 0);
+      if(strlen(guess) != 5) printf("\n << ONLY 5 LETTERS >>\n");
     } while(strlen(guess) != 5);
 
     setResults(answer, guess, count_game);
