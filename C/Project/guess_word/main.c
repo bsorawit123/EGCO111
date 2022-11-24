@@ -9,30 +9,36 @@ struct {
   char guess;
   char answer;
   char hint;
-  int check; // 0 = true, 1 = false
+  int check; // 0 = false, 1 = true
 } results[6][5];
+
+struct {
+  char name[7];
+  int score;
+} player1, player2;
 
 void clear() {
   system("clear"); // mac
   // system("cls"); // windows
 }
 
-void startGameName() {
+void startGameName(int *n) {
   clear();
   printf("=====================\n");
-  printf("\n   GUESS WORD GAME\n");
+  printf("\n   GUESS WORD GAME");
+  printf("\n      GAME : %d\n", *n);
   printf("\n=====================\n");
 }
 
-void start_word() {
+void start_word(int *n) {
   clear();
-  startGameName();
+  startGameName(n);
   // set before game start
   for(int i = 0; i < 6; i++) {
     for(int j = 0; j < 5; j++) {
       results[i][j].title = '-';
       results[i][j].hint = ' ';
-      results[i][j].check = 1;
+      results[i][j].check = 0;
     }
   }
   // print dash
@@ -49,9 +55,9 @@ void start_word() {
   printf("\n=====================\n");
 }
 
-void print_word(char *guess) {
+void print_word(char *guess, int *n) {
   clear();
-  startGameName();
+  startGameName(n);
   for(int i = 0; i < 6; i++) {
     printf("\n%6s", " ");
     for(int j = 0; j < 5; j++) {
@@ -107,7 +113,7 @@ void check_word(int count_game) {
   for(int i = 0; i < 5; i++) {
     if(results[count_game][i].answer == tolower(results[count_game][i].guess)) {
       results[count_game][i].title = toupper(results[count_game][i].guess);
-      results[count_game][i].check = 0;
+      results[count_game][i].check = 1;
     } else {
       for(int j = 0; j < 5; j++) {
         results[count_game][i].title = tolower(results[count_game][i].guess);
@@ -122,37 +128,37 @@ void check_word(int count_game) {
 int check_win(int count_game) {
   int check = 0;
   for(int i = 0; i < 5; i++) {
-    if(results[count_game][i].check == 0) check++;
+    if(results[count_game][i].check == 1) check++;
   }
-  if(check == 5) return 0;
-  return 1;
+  if(check == 5) return 1;
+  return 0;
 }
 
-void win(char answer[], int count_game, int score) {
-  // printf("======================\n");
-  printf("\n       CORRECT\n");
-  printf("       SCORE: %d\n", score);
-  printf("\n=====================\n");
-  printf("\n    Answer: %s\n", toupper(answer));
-  printf("\n=====================");
-}
+void win_lose(char answer[], int count_game, char type[], int *players) {
+  if(strcmp(type, "win") == 0) {
+    printf("\n      CORRECT!\n");
+  } else {
+    printf("\n       WRONG!\n");
+  } 
 
-void lose(char answer[], int score) {
-  // clear();
-  // printf("======================\n");
-  printf("\n        WRONG\n");
-  printf("       SCORE: %d\n", score);
+  if(*players == 1) {
+    printf(" %6s's SCORE: %d\n", player1.name, player1.score);
+  } else if(*players == 2) {
+    printf(" %6s's SCORE: %d\n", player1.name, player1.score);
+    printf(" %6s's SCORE: %d\n", player2.name, player2.score);
+  }
+
   printf("\n=====================\n");
-  printf("\n    Answer: %s\n", toupper(answer));
-  printf("\n=====================");
+  printf("\n    ANSWER : %s\n", answer);
+  printf("\n=====================\n");
 }
 
 void check_str(char answer_text[]) {
   char temp[strlen(answer_text)-1];
   for(int i = 0 ; i < strlen(answer_text)-1; i++) {
-    if(answer_text[0] == '\n') {
-      temp[i] = answer_text[i+1];
-    }
+    // if(answer_text[0] == '\n') {
+    //   temp[i] = answer_text[i+1];
+    // }
     if(answer_text[strlen(answer_text)-1] == '\n') {
       temp[i] = answer_text[i];
     }
@@ -169,42 +175,60 @@ int check_category() {
 
   do {
     printf("\n      CHOOSE: ");
+    fflush(stdin);
     scanf("%d", &choose);
-    if(choose != 1 && choose != 2) printf("<< Enter only 1 and 2 >>\n");
+    if(choose != 1 && choose != 2) printf("\n<< Enter only 1 and 2 >>\n");
   } while(choose != 1 && choose != 2);
 
   return choose;
 }
 
-int check_players() {
+int check_players(int *n) {
   int choose;
+  int check = 0;
   clear();
-  startGameName();
+  startGameName(n);
   printf("\n   >> 1 PLAYER  <<\n");
   printf("\n   >> 2 PLAYERS <<\n");
   printf("\n=====================\n");
 
   do {
     printf("\n      CHOOSE: ");
-    scanf("%d", &choose);
-    if(choose != 1 && choose != 2) printf("<< Enter only 1 and 2 >>\n");
+    fflush(stdin);
+    check = scanf("%d", &choose);
+    while(check != 1) {
+      printf("\n  << ONLY 1 AND 2 >>\n");
+      fflush(stdin);
+      printf("\n      CHOOSE: ");
+      check = scanf("%d", &choose);
+    }
+    if(choose != 1 && choose != 2) printf("\n  << ONLY 1 AND 2 >>\n");
   } while(choose != 1 && choose != 2);
   return choose;
 }
 
-void setNamePlayer(char player1[], char player2[]) {
-  printf("\n  SET PLAYER NAME MAXIMUM 10 LETTERS\n");
-  do {
-    printf("\n  PLAYER 1: ");
-    scanf("%s", player1);
-    if(strlen(player1) > 6) printf("<< Name can't longer than 6 letters >>\n");
-  } while(strlen(player1) > 6);
-  do {
-    printf("\n  PLAYER 2: ");
-    scanf("%s", player2);
-    if(strlen(player2) > 6) printf("<< Name can't longer than 6 letters >>\n");
-  } while(strlen(player2) > 6);
-
+void setNamePlayer(char player1[], char player2[], int *players) {
+  printf("\n=====================\n");
+  printf("\n ENTER NAME (MAX: 6)\n");
+  fflush(stdin);
+  if(*players == 1) {
+    do {
+      printf("\n  PLAYER: ");
+      scanf("%s", player1);
+      if(strlen(player1) > 6) printf("\n<< Name can't longer than 6 letters >>\n");
+    } while(strlen(player1) > 6);
+  } else if(*players == 2) {
+    do {
+      printf("\n  PLAYER 1: ");
+      scanf("%s", player1);
+      if(strlen(player1) > 6) printf("\n<< Name can't longer than 6 letters >>\n");
+    } while(strlen(player1) > 6);
+    do {
+      printf("\n  PLAYER 2: ");
+      scanf("%s", player2);
+      if(strlen(player2) > 6) printf("\n<< Name can't longer than 6 letters >>\n");
+    } while(strlen(player2) > 6);
+  }
   // Capitalize
   player1[0] = toupper(player1[0]);
   for(int i = 1; i < strlen(player1); i++) {
@@ -216,72 +240,117 @@ void setNamePlayer(char player1[], char player2[]) {
   }
 }
 
-void game(score) {
+void print_defi(char answer[], char answer_txt[], int *players) {
+  char next;
+  printf("\n%s : %s\n\n", answer, answer_txt);
+  if(*players == 2) {
+    printf("TYPE \'Y\' TO CONTINUE : ");
+    fflush(stdin);
+    scanf(" %c", &next);
+  }
+}
+
+void game(int *players, int *n) {
   srand(time(NULL));
   int lines = checkLines("words.txt");
   int count_game = 0;
-  int players = check_players();
-  char player1[7], player2[7];
   char guess[6];
   char answer[10], answer_text[1024];
   random_word("words.txt", lines, answer, answer_text);
   check_str(answer_text);
 
-  startGameName();
-
-  if(players == 2) setNamePlayer(player1, player2);
-
-  if(players == 1 || players == 2) start_word();
+  startGameName(n);
+  start_word(n);
 
   do {
     do {
-      if(players ==  1) {
-        printf("\n  Guess word: ");
-      } else if(players == 2) {
-
+      if(*players ==  1) {
+        printf("\n%s guess: ", player1.name);
+      } else if(*players == 2) {
         if(count_game % 2 == 0) {
-          printf("%s guess: ", player1);
+          printf("\n%s guess: ", player1.name);
         } else {
-          printf("%s guess: ", player2);
+          printf("\n%s guess: ", player2.name);
         }
       }
+      fflush(stdin);
       scanf("%s", guess);
-      if(strlen(guess) != 5) printf(" << only 5 letters >>\n");
+      if(strlen(guess) != 5) printf("\n << only 5 letters >>\n");
     } while(strlen(guess) != 5);
 
     setResults(answer, guess, count_game);
     check_word(count_game);
-    print_word(guess);
+    print_word(guess, n);
     
-    if(check_win(count_game) == 0) {
-      score++;
-      win(answer, count_game, score);
+    if(check_win(count_game) == 1) {
+      if(*players == 1) {
+        player1.score += 1;
+      } else if(*players == 2) {
+        if(count_game % 2 == 0) { // P1 WIN
+          player1.score += 1;
+        } else if(count_game % 2 == 1) { // P2 WINT
+          player2.score += 1;
+        }
+      }
+      win_lose(answer, count_game, "win", players);
       break;
     }
 
     count_game++;
   } while(count_game < 6);
 
-  char check_defi[5];
-  do {
-    printf("DEFINATION? (y/n): ");
-    scanf("%s", check_defi);
-    if(tolower(check_defi) != "yes" && tolower(check_defi) != "y" && tolower(check_defi) != "no" && tolower(check_defi) != "n") {
-      printf("<< Please type y or n >>\n");
-    }
-  } while(tolower(check_defi) != "yes" && tolower(check_defi) != "y" && tolower(check_defi) != "no" && tolower(check_defi) != "n");
+  if(check_win(5) == 0 && count_game == 6) {
+    win_lose(answer, count_game, "lose", players);
+  }
 
-  if(check_win(5) == 1 && count_game == 6) {
-    lose(answer, score);
+  char check_defi;
+  do {
+    printf("\nDEFINATION ? (y/n): ");
+    fflush(stdin);
+    scanf(" %c", &check_defi);
+    if(tolower(check_defi) != 'y' && tolower(check_defi) != 'n') {
+      printf("\n<< Please type y or n >>\n");
+    }
+  } while(tolower(check_defi) != 'y' && tolower(check_defi) != 'n');
+
+  if(tolower(check_defi) == 'y') {
+    print_defi(answer, answer_text, players);
   }
 }
 
-int main() {
-  int score = 0;
-  game(score);
+void who_win() {
+  clear();
+  printf("\n=====================\n");
+  if(player1.score == 3) printf("\n    %6s WIN!\n", player1.name);
+  else if(player2.score == 3) printf("\n    %6s WIN!\n", player2.name);
+  printf("\n=====================\n");
+  printf("\n %6s's SCORE: %d\n", player1.name, player1.score);
+  printf("\n %6s's SCORE: %d\n", player2.name, player2.score);
+  printf("\n=====================\n");
+}
 
-  // clear();
-  // startGameName();
+int main() {
+  int n = 1;
+  int players = check_players(&n);
+  char play_again;
+  
+  if(players == 1) {
+    setNamePlayer(player1.name, player2.name, &players);
+    do {
+      game(&players, &n);
+      printf("DO YOU WANT TO PLAY MORE ? (y/n): ");
+      fflush(stdin);
+      scanf(" %c", &play_again);
+      if(tolower(play_again) == 'y') n++;
+    } while(tolower(play_again) != 'n');
+  } else if(players == 2) {
+    setNamePlayer(player1.name, player2.name, &players);
+    do {
+      game(&players, &n);
+      n++;
+    } while(n < 6 && player1.score < 3 && player2.score < 3);
+    who_win();
+  }
 
   return 0;
 }
