@@ -1,4 +1,4 @@
-while--is one type of loop in programming
+while--is one type of loop in programming.
 print--used to display what you want to show in C use printf() in some languages use print()
 scanf--used to get input from user
 fopen--used to open a file to perform various operations which include reading, writing etc. along with various modes.
@@ -11,3 +11,4 @@ break--used to ends the loop immediately when it is encountered.
 const--used to define a constant.
 short--is a type modifier that alters the basic data type.
 array--is a variable that can store multiple values.
+clear--is unix command to clear terminal.

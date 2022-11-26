@@ -1,111 +1,70 @@
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
-struct result {
-  char title;
-  char hint;
-  char check;
-} results[5];
-
-int checkLines(char*);
+int check_lines() {
+  FILE *fp = fopen("history.txt", "r");
+  int lines = 0;
+  char text[1024];
+  while(!feof(fp)) {
+    fgets(text, 1024, fp);
+    lines++;
+  }
+  fclose(fp);
+  return lines;
+}
 
 int main() {
-  char answer[10] = "while";
-  char guess[5];
-  int count_games = 6;
+  FILE *fp = fopen("history.txt", "r");
+  if(fp == NULL) {
+    FILE *fp1 = fopen("history.txt", "w");
+    fprintf(fp1, "%s %d", "Boom", 6);
+    fprintf(fp1, "\n%s %d", "Jetyy", 8);
+    fprintf(fp1, "\n%s %d", "Love", 10);
+    fprintf(fp1, "\n%s %d", "Ultra", 12);
+    fprintf(fp1, "\n%s %d", "Boom", 3);
+    fprintf(fp1, "\n%s %d", "Tiger", 1);
+    fclose(fp1);
+  } else {
+    int lines = check_lines();
+    char names[lines][10];
+    int scores[lines];
 
-  int file_lines = checkLines("words.txt");
-  char *words[file_lines];
-  char *words_txt[file_lines];
-  char text[1024];
-  char *word, *word_txt;
-
-  FILE *fp = fopen("words.txt", "r");
-
-  for(int i = 0; i < file_lines; i++) {
-    fgets(text, 1024, fp);
-    char split[] = "--";
-
-    words[i] = strtok(text, split);
-    words_txt[i] = strtok(NULL, split);
-  }
-
-  printf("==================\n");
-  printf("\n    ");
-  for(int i = 0; i < 5; i++) {
-    results[i].title = '-';
-    results[i].hint = ' ';
-    results[i].check = 'F';
-    printf("%c ", results[i].title);
-  }
-  printf("\n");
-  for(int i = 0; i < 5; i++) {
-    printf("%c ", results[i].hint);
-  }
-  printf("\n");
-  printf("==================\n");
-
-  while(count_games > 0) {
-    printf("\nGuess word: ");
-    scanf("%s", guess);
-
-    printf("\n");
-    for(int i = 0; i < 5; i++) {
-      if(guess[i] == answer[i]) {
-        results[i].title = toupper(guess[i]);
-        results[i].check = 'T';
-      }
+    FILE *fp2 = fopen("history.txt", "r");
+    int counter = 0;
+    while(!feof(fp2)) {
+      fscanf(fp2, "%s %d", names[counter], &scores[counter]);
+      counter++;
     }
-    printf("\n");
+    fclose(fp2);
 
-    for(int i = 0; i < 5; i++) {
-      if(results[i].title == '-') {
-        for(int j = 0; j < 5; j++) {
-          if(guess[i] == answer[j] && results[i].check != 'T') {
-            results[i].title = guess[i];
-            results[i].check = 'T';
-            results[i].hint = '^';
-            break;
+    int pos, temp;
+    for(int i = 0; i < lines; i++) {
+      for(int j = i+1; j < lines; j++) {
+        if(strcmp(names[i], names[j]) == 0) {
+          if(scores[i] < scores[j]) {
+            temp = scores[i];
+            scores[i] = scores[j];
+            scores[j] = scores[i];
           }
+          pos = j;
         }
       }
     }
 
-    for(int i = 0; i < 5; i++) {
-      printf("%c ", results[i].title);
-    }
-    printf("\n");
-    for(int i = 0; i < 5; i++) {
-      printf("%c ", results[i].hint);
+    for(int i = pos; i < lines-1; i++) {
+      scores[i] = scores[i+1];
+      strcpy(names[i], names[i+1]);
     }
 
-
-    int check_true = 0;
-    for(int i = 0; i < 5; i++) {
-      if(results[i].check == 'T') check_true++;
+    FILE *fp3 = fopen("history.txt", "w");
+    for(int i = 0; i < lines-1; i++) {
+      if(i == 0) fprintf(fp3, "%s %d", names[i], scores[i]);
+      else fprintf(fp3, "\n%s %d", names[i], scores[i]);
     }
-
-    if(check_true == 5) count_games = 0;
-
-    count_games--;
   }
 
+  
 
 
   return 0;
-}
-
-int checkLines(char *filename) {
-  FILE *fp = fopen(filename, "r");
-  int line = 0, ch;
-
-  if(fp == NULL) return 0;
-
-  line++; // first line
-  while((ch = fgetc(fp)) != EOF) {
-    if(ch == '\n') line++;
-  }
-
-  return line;
 }

@@ -18,8 +18,7 @@ struct {
 } player1, player2;
 
 void clear() {
-  system("clear"); // mac
-  // system("cls"); // windows
+  system("@cls||clear");
 }
 
 void startGameName(int *n) {
@@ -74,8 +73,8 @@ void print_word(char *guess, int *n) {
 void setResults(char answer[10], char guess[10], int count_game) {
   // set guess and answer after game start
   for(int i = 0; i < 5; i++) {
-    results[count_game][i].guess = guess[i];
-    results[count_game][i].answer = answer[i];
+    results[count_game][i].guess = tolower(guess[i]);
+    results[count_game][i].answer = tolower(answer[i]);
   }
 }
 
@@ -95,32 +94,65 @@ int random_num(int min, int max) {
   return (rand() % (max - min + 1)) + min;
 }
 
-void random_word(char *filename, int lines, char answer[], char answer_text[]) {
+void random_word(char *filename, int *lines, char answer[], char answer_text[], int *random) {
   FILE *fp = fopen(filename, "r");
-  char words[lines][1024], text[1024], *ans, *ans_txt;
-  int random = random_num(0, lines-1);
-  for(int i = 0; i < checkLines("words.txt"); i++) {
-    fgets(words[i], 1024, fp);
+  if(fp = NULL) {
+    FILE *fp1 = fopen(filename, "w");
+    fprintf(fp1, "while--is one type of loop in programming.\n");
+    fprintf(fp1, "print--used to display what you want to show in C use printf() in some languages use print()\n");
+    fprintf(fp1, "scanf--used to get input from user\n");
+    fprintf(fp1, "fopen--used to open a file to perform various operations which include reading, writing etc. along with various modes.\n");
+    fprintf(fp1, "fgetc--used to obtain input from a file single character at a time.\n");
+    fprintf(fp1, "fgets--reads characters from the standard input (stdin) and stores them as a C string into str until a newline character or the end-of-file is reached.\n");
+    fprintf(fp1, "fputc--used to write a single character at a time to a given file.\n");
+    fprintf(fp1, "fputs--writes a string to the specified stream up to but not including the null character.\n");
+    fprintf(fp1, "float--is a datatype which is used to represent the floating point numbers.\n");
+    fprintf(fp1, "break--used to ends the loop immediately when it is encountered.\n");
+    fprintf(fp1, "const--used to define a constant.\n");
+    fprintf(fp1, "short--is a type modifier that alters the basic data type.\n");
+    fprintf(fp1, "array--is a variable that can store multiple values.\n");
+    fprintf(fp1, "clear--is unix command to clear terminal.");
+    fclose(fp1);
+  } else {
+    char words[*lines][1024], text[1024], *ans, *ans_txt;
+    for(int i = 0; i < checkLines("words.txt"); i++) {
+      fgets(words[i], 1024, fp);
+    }
+    fclose(fp);
+    ans = strtok(words[*random], "--");
+    ans_txt = strtok(NULL, "--");
+    strcpy(answer, ans);
+    strcpy(answer_text, ans_txt);
   }
-  fclose(fp);
-  ans = strtok(words[random], "--");
-  ans_txt = strtok(NULL, "--");
-  strcpy(answer, ans);
-  strcpy(answer_text, ans_txt);
+  
 }
 
 void check_word(int count_game) {
   for(int i = 0; i < 5; i++) {
-    if(results[count_game][i].answer == tolower(results[count_game][i].guess)) {
+    if(results[count_game][i].answer == results[count_game][i].guess) {
       results[count_game][i].title = toupper(results[count_game][i].guess);
       results[count_game][i].check = 1;
     } else {
-      for(int j = 0; j < 5; j++) {
-        results[count_game][i].title = tolower(results[count_game][i].guess);
-        if(tolower(results[count_game][i].guess) == results[count_game][j].answer) {
-          results[count_game][i].hint = '^';
+      if(results[count_game][i].title == '-') {
+        for(int j = 0; j < 5; j++) {
+          if(results[count_game][i].answer == results[count_game][j].guess) {
+            results[count_game][j].title = results[count_game][j].guess;
+            results[count_game][j].hint = '^';
+          }
         }
       }
+    }
+  } 
+  for(int i = 0; i < 5; i++) {
+    if(results[count_game][i].hint == '^') {
+      for(int j = i+1; j < 5; j++) {
+        if(results[count_game][i].title == results[count_game][j].title) {
+          results[count_game][j].hint = ' ';
+        }
+      }
+    }
+    if(results[count_game][i].title == '-') {
+      results[count_game][i].title = results[count_game][i].guess;
     }
   }
 }
@@ -166,11 +198,12 @@ void check_str(char answer_text[]) {
   strcpy(answer_text, temp);
 }
 
-int check_category() {
+int check_mode() {
   int choose;
   printf("\n   SELECT CATEGORY\n\n");
-  printf("\n   1. %-12s\n", "CODING WORD");
-  printf("\n   2. %-12s\n", "FREE WORD");
+  printf("\n   1. PLAY GAMES\n");
+  printf("\n   2. HOW TO PLAY\n");
+  printf("\n   3. ADD YOUR OWN WORD\n");
   printf("\n=====================\n");
 
   do {
@@ -250,7 +283,7 @@ void print_defi(char answer[], char answer_txt[], int *players) {
   }
 }
 
-int num_in_guess(char guess[]) {
+int num_in_str(char guess[]) {
   int num_in_guess = 0;
   for(int i = 0; i < strlen(guess); i++) {
     if(isdigit(guess[i]) == 1) num_in_guess++;
@@ -258,13 +291,62 @@ int num_in_guess(char guess[]) {
   return num_in_guess;
 }
 
-void game(int *players, int *n) {
-  srand(time(NULL));
+int check_add_word(char *filename, char add_text[]) {
   int lines = checkLines("words.txt");
+  FILE *fp = fopen(filename, "r");
+  char words[lines][1024], check_word[10];
+  for(int i = 0; i < lines; i++) {
+    fgets(words[i], 1024, fp);
+    for(int j = 0; j < 5; j++) {
+      check_word[j] = words[i][j];
+    }
+    strcpy(words[i], check_word);
+  }
+  fclose(fp);
+
+  for(int i = 0; i < lines; i++) {
+    if(strcmp(words[i], add_text) == 0) return 0;
+  }
+  if(num_in_str(add_text) != 0) return 0;
+  return 1;
+}
+
+void add_word(char *filename, int *lines) {
+  char word_add[10], add_text[60], text[1024] = "\n";
+  int check_add;
+  do {
+    fflush(stdin);
+    printf("\nENTER YOUR WORD: ");
+    scanf("%s", word_add);
+
+    check_add = check_add_word("words.txt", word_add);
+    if(strlen(word_add) != 5) printf("\n<< ONLY 5 LETTERS >>\n");
+    if(check_add == 0) printf("\n<< THIS WORD ALREADY EXISTS >>\n");
+  } while(strlen(word_add) != 5 || check_add == 0);
+
+  do {
+    fflush(stdin);
+    printf("\nENTER DEFINITION: ");
+    gets(add_text);
+    if(strlen(add_text) > 50) printf("\n<< NO LONGER THAN 50 >>\n");
+  } while(strlen(add_text) > 50);
+
+  strcat(text, word_add);
+  strcat(text, "--");
+  strcat(text, add_text);
+
+  FILE *fp = fopen("words.txt", "a");
+  fputs(text ,fp);
+  fclose(fp);
+}
+
+void game(int *players, int *n, int *lines) {
   int count_game = 0, check_guess;
   char guess[6];
   char answer[10], answer_text[1024];
-  random_word("words.txt", lines, answer, answer_text);
+  int random = random_num(0, (*lines)-1);;
+
+  random_word("words.txt", lines, answer, answer_text, &random);
   check_str(answer_text);
 
   startGameName(n);
@@ -284,7 +366,7 @@ void game(int *players, int *n) {
           }
         }
         scanf("%s", guess);
-        check_guess = num_in_guess(guess);
+        check_guess = num_in_str(guess);
         if(check_guess != 0) {
           printf("\n<<   NO NUMBER!   >>\n");
           printf("<< ONLY 5 LETTERS >>\n");
@@ -314,9 +396,7 @@ void game(int *players, int *n) {
     count_game++;
   } while(count_game < 6);
 
-  if(check_win(5) == 0 && count_game == 6) {
-    win_lose(answer, count_game, "lose", players);
-  }
+  if(check_win(5) == 0 && count_game == 6) win_lose(answer, count_game, "lose", players);
 
   char check_defi;
   do {
@@ -344,28 +424,80 @@ void who_win() {
   printf("\n=====================\n");
 }
 
+void save_game(char high_player[], int *high_score) {
+  char name[10];
+  int score;
+
+  FILE *fp = fopen("high-score.txt", "r");
+  if(fp == NULL) {
+    FILE *fp1 = fopen("high-score.txt", "w");
+    fprintf(fp1, "%s %d", player1.name, player1.score);
+    fclose(fp1);
+
+    strcpy(high_player, player1.name);
+    *high_score = player1.score;
+  } else {
+    fscanf(fp, "%s %d", name, &score);
+    if(player1.score > score) {
+      *high_score = player1.score;
+      strcpy(high_player, player1.name);
+
+      FILE *fp2 = fopen("high-score.txt", "w");
+      fprintf(fp2, "%s %d", high_player, *high_score);
+      fclose(fp2);
+    } else {
+      *high_score = score;
+      strcpy(high_player, name);
+    }
+  }
+  fclose(fp);
+}
+
 int main() {
-  int n = 1;
+  srand(time(NULL));
+  int n = 1, high_score;
+  char high_player[10];
+  int lines = checkLines("words.txt");
   int players = check_players(&n);
-  char play_again;
-  
+  char play_again, save;
+
   if(players == 1) {
     setNamePlayer(player1.name, player2.name, &players);
+    game(&players, &n, &lines);
     do {
-      game(&players, &n);
-      printf("DO YOU WANT TO PLAY MORE ? (y/n): ");
+      printf("\nDO YOU WANT TO PLAY MORE ? (y/n): ");
       fflush(stdin);
       scanf(" %c", &play_again);
-      if(tolower(play_again) == 'y') n++;
-    } while(tolower(play_again) != 'n');
+      if(tolower(play_again) != 'y' && tolower(play_again) != 'n') printf("\n<< ONLY Y AND N >>\n");
+    } while(tolower(play_again) != 'y' && tolower(play_again) != 'n');
+    
+    if(tolower(play_again) == 'y') {
+      n++;
+      game(&players, &n, &lines);
+    } else if(tolower(play_again) == 'n') {
+      save_game(high_player, &high_score);
+      clear();
+      printf("=====================\n");
+      printf("\n     HIGH SCORE IS\n");
+      printf("\n       %s  %d\n", high_player, high_score);
+      printf("\n=====================\n");
+    }
+
   } else if(players == 2) {
     setNamePlayer(player1.name, player2.name, &players);
     do {
-      game(&players, &n);
+      game(&players, &n, &lines);
       n++;
     } while(n < 6 && player1.score < 3 && player2.score < 3);
     who_win();
   }
+
+  // char choice_word;
+  // do {
+  //   printf("\nADD YOUR OWN WORD (y/n): ");
+  //   scanf(" %c", &choice_word);
+  // } while(tolower(choice_word) != 'y' || tolower(choice_word) != 'n');
+  // add_word("words.txt", &lines);
 
   return 0;
 }
