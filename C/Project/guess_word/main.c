@@ -96,35 +96,15 @@ int random_num(int min, int max) {
 
 void random_word(char *filename, int *lines, char answer[], char answer_text[], int *random) {
   FILE *fp = fopen(filename, "r");
-  if(fp = NULL) {
-    FILE *fp1 = fopen(filename, "w");
-    fprintf(fp1, "while--is one type of loop in programming.\n");
-    fprintf(fp1, "print--used to display what you want to show in C use printf() in some languages use print()\n");
-    fprintf(fp1, "scanf--used to get input from user\n");
-    fprintf(fp1, "fopen--used to open a file to perform various operations which include reading, writing etc. along with various modes.\n");
-    fprintf(fp1, "fgetc--used to obtain input from a file single character at a time.\n");
-    fprintf(fp1, "fgets--reads characters from the standard input (stdin) and stores them as a C string into str until a newline character or the end-of-file is reached.\n");
-    fprintf(fp1, "fputc--used to write a single character at a time to a given file.\n");
-    fprintf(fp1, "fputs--writes a string to the specified stream up to but not including the null character.\n");
-    fprintf(fp1, "float--is a datatype which is used to represent the floating point numbers.\n");
-    fprintf(fp1, "break--used to ends the loop immediately when it is encountered.\n");
-    fprintf(fp1, "const--used to define a constant.\n");
-    fprintf(fp1, "short--is a type modifier that alters the basic data type.\n");
-    fprintf(fp1, "array--is a variable that can store multiple values.\n");
-    fprintf(fp1, "clear--is unix command to clear terminal.");
-    fclose(fp1);
-  } else {
-    char words[*lines][1024], text[1024], *ans, *ans_txt;
-    for(int i = 0; i < checkLines("words.txt"); i++) {
-      fgets(words[i], 1024, fp);
-    }
-    fclose(fp);
-    ans = strtok(words[*random], "--");
-    ans_txt = strtok(NULL, "--");
-    strcpy(answer, ans);
-    strcpy(answer_text, ans_txt);
+  char words[*lines][1024], text[1024], *ans, *ans_txt;
+  for(int i = 0; i < checkLines("words.txt"); i++) {
+    fgets(words[i], 1024, fp);
   }
-  
+  ans = strtok(words[*random], "--");
+  ans_txt = strtok(NULL, "--");
+  strcpy(answer, ans);
+  strcpy(answer_text, ans_txt);
+  fclose(fp);
 }
 
 void check_word(int count_game) {
@@ -248,19 +228,20 @@ void setNamePlayer(char player1[], char player2[], int *players) {
     do {
       printf("\n  PLAYER: ");
       scanf("%s", player1);
-      if(strlen(player1) > 6) printf("\n<< Name can't longer than 6 letters >>\n");
+      if(strlen(player1) > 6) printf("\n<< NAME CAN\'T BE LONGER 6 LETTERS >>\n");
     } while(strlen(player1) > 6);
   } else if(*players == 2) {
     do {
       printf("\n  PLAYER 1: ");
       scanf("%s", player1);
-      if(strlen(player1) > 6) printf("\n<< Name can't longer than 6 letters >>\n");
+      if(strlen(player1) > 6) printf("\n<< NAME CAN\'T BE LONGER 6 LETTERS >>\n");
     } while(strlen(player1) > 6);
     do {
       printf("\n  PLAYER 2: ");
       scanf("%s", player2);
-      if(strlen(player2) > 6) printf("\n<< Name can't longer than 6 letters >>\n");
-    } while(strlen(player2) > 6);
+      if(strlen(player2) > 6) printf("\n<< NAME CAN\'T BE LONGER 6 LETTERS >>\n");
+      if(strcmp(player1, player2) == 0) printf("\n<< CAN\'T USE THE SAME NAME >>\n");
+    } while(strlen(player2) > 6 || strcmp(player1, player2) == 0);
   }
   // Capitalize
   player1[0] = toupper(player1[0]);
@@ -415,13 +396,21 @@ void game(int *players, int *n, int *lines) {
 
 void who_win() {
   clear();
-  printf("\n=====================\n");
-  if(player1.score == 3) printf("\n    %6s WIN!\n", player1.name);
-  else if(player2.score == 3) printf("\n    %6s WIN!\n", player2.name);
-  printf("\n=====================\n");
-  printf("\n %6s's SCORE: %d\n", player1.name, player1.score);
-  printf("\n %6s's SCORE: %d\n", player2.name, player2.score);
-  printf("\n=====================\n");
+  printf("=====================\n");
+  printf("|                   |\n");
+  if(player1.score == 3) printf("|   %6s WIN!     |\n", player1.name);
+  else if(player2.score == 3) printf("|   %6s WIN!     |\n", player2.name);
+  printf("|                   |\n");
+  printf("=====================\n");
+  printf("|                   |\n");
+  printf("| %6s's SCORE: %d |\n", player1.name, player1.score);
+  printf("| %6s's SCORE: %d |\n", player2.name, player2.score);
+  printf("|                   |\n");
+  printf("=====================\n");
+  printf("   (\\__/) ||\n");
+  printf("   (^--^) ||\n");
+  printf("   /   >> ||\n");
+  printf("  /    )  ||\n");
 }
 
 void save_game(char high_player[], int *high_score) {
@@ -443,7 +432,7 @@ void save_game(char high_player[], int *high_score) {
       strcpy(high_player, player1.name);
 
       FILE *fp2 = fopen("high-score.txt", "w");
-      fprintf(fp2, "%s %d", high_player, *high_score);
+      fprintf(fp2, "\n%s %d", high_player, *high_score);
       fclose(fp2);
     } else {
       *high_score = score;
@@ -451,6 +440,21 @@ void save_game(char high_player[], int *high_score) {
     }
   }
   fclose(fp);
+}
+
+void play_more(char *play_again, int *players, int *lines, int *n) {
+  do {
+    printf("\nDO YOU WANT TO PLAY MORE ? (y/n): ");
+    fflush(stdin);
+    scanf(" %c", play_again);
+    if(tolower(*play_again) != 'y' && tolower(*play_again) != 'n') printf("\n<< ONLY Y AND N >>\n");
+  } while(tolower(*play_again) != 'y' && tolower(*play_again) != 'n');
+
+  if(tolower(*play_again) == 'y') {
+    *n += 1;
+    game(players, n, lines);
+    play_more(play_again, players, lines, n);
+  }
 }
 
 int main() {
@@ -464,23 +468,21 @@ int main() {
   if(players == 1) {
     setNamePlayer(player1.name, player2.name, &players);
     game(&players, &n, &lines);
-    do {
-      printf("\nDO YOU WANT TO PLAY MORE ? (y/n): ");
-      fflush(stdin);
-      scanf(" %c", &play_again);
-      if(tolower(play_again) != 'y' && tolower(play_again) != 'n') printf("\n<< ONLY Y AND N >>\n");
-    } while(tolower(play_again) != 'y' && tolower(play_again) != 'n');
+    play_more(&play_again, &players, &lines, &n);
     
-    if(tolower(play_again) == 'y') {
-      n++;
-      game(&players, &n, &lines);
-    } else if(tolower(play_again) == 'n') {
+    if(tolower(play_again) == 'n') {
       save_game(high_player, &high_score);
       clear();
       printf("=====================\n");
-      printf("\n     HIGH SCORE IS\n");
-      printf("\n       %s  %d\n", high_player, high_score);
-      printf("\n=====================\n");
+      printf("|                   |\n");
+      printf("|   HIGH SCORE IS   |\n");
+      printf("|      %s  %d       |\n", high_player, high_score);
+      printf("|                   |\n");
+      printf("=====================\n");
+      printf("   (\\__/) ||\n");
+      printf("   (^--^) ||\n");
+      printf("   /   >> ||\n");
+      printf("  /    )  ||\n");
     }
 
   } else if(players == 2) {
