@@ -178,24 +178,6 @@ void check_str(char answer_text[]) {
   strcpy(answer_text, temp);
 }
 
-int check_mode() {
-  int choose;
-  printf("\n   SELECT CATEGORY\n\n");
-  printf("\n   1. PLAY GAMES\n");
-  printf("\n   2. HOW TO PLAY\n");
-  printf("\n   3. ADD YOUR OWN WORD\n");
-  printf("\n=====================\n");
-
-  do {
-    printf("\n      CHOOSE: ");
-    fflush(stdin);
-    scanf("%d", &choose);
-    if(choose != 1 && choose != 2) printf("\n<< Enter only 1 and 2 >>\n");
-  } while(choose != 1 && choose != 2);
-
-  return choose;
-}
-
 int check_players(int *n) {
   int choose;
   int check = 0;
@@ -321,6 +303,17 @@ void add_word(char *filename, int *lines) {
   fclose(fp);
 }
 
+void add_word_menu() {
+  int lines = checkLines("words.txt");
+  char choice_word;
+  do {
+    printf("\nDO YOU WANT TO ADD WORD ? (y/n): ");
+    scanf(" %c", &choice_word);
+  } while(tolower(choice_word) != 'y' && tolower(choice_word) != 'n');
+  if(tolower(choice_word) == 'y') add_word("words.txt", &lines);
+  
+}
+
 void game(int *players, int *n, int *lines) {
   int count_game = 0, check_guess;
   char guess[6];
@@ -400,6 +393,7 @@ void who_win() {
   printf("|                   |\n");
   if(player1.score == 3) printf("|   %6s WIN!     |\n", player1.name);
   else if(player2.score == 3) printf("|   %6s WIN!     |\n", player2.name);
+  else if(player1.score == player2.score) printf("|        DRAW!      |\n", player2.name);
   printf("|                   |\n");
   printf("=====================\n");
   printf("|                   |\n");
@@ -411,6 +405,8 @@ void who_win() {
   printf("   (^--^) ||\n");
   printf("   /   >> ||\n");
   printf("  /    )  ||\n");
+
+  
 }
 
 void save_game(char high_player[], int *high_score) {
@@ -443,6 +439,8 @@ void save_game(char high_player[], int *high_score) {
 }
 
 void play_more(char *play_again, int *players, int *lines, int *n) {
+  char high_player[10];
+  int high_score;
   do {
     printf("\nDO YOU WANT TO PLAY MORE ? (y/n): ");
     fflush(stdin);
@@ -454,13 +452,26 @@ void play_more(char *play_again, int *players, int *lines, int *n) {
     *n += 1;
     game(players, n, lines);
     play_more(play_again, players, lines, n);
+  } 
+  if(tolower(*play_again) == 'n') {
+    save_game(high_player, &high_score);
+    clear();
+    printf("=====================\n");
+    printf("|                   |\n");
+    printf("|   HIGH SCORE IS   |\n");
+    printf("|      %6s  %d    |\n", high_player, high_score);
+    printf("|                   |\n");
+    printf("=====================\n");
+    printf("   (\\__/) ||\n");
+    printf("   (^--^) ||\n");
+    printf("   /   >> ||\n");
+    printf("  /    )  ||\n");
   }
 }
 
-int main() {
+void play_game() {
   srand(time(NULL));
-  int n = 1, high_score;
-  char high_player[10];
+  int n = 1;
   int lines = checkLines("words.txt");
   int players = check_players(&n);
   char play_again, save;
@@ -469,22 +480,6 @@ int main() {
     setNamePlayer(player1.name, player2.name, &players);
     game(&players, &n, &lines);
     play_more(&play_again, &players, &lines, &n);
-    
-    if(tolower(play_again) == 'n') {
-      save_game(high_player, &high_score);
-      clear();
-      printf("=====================\n");
-      printf("|                   |\n");
-      printf("|   HIGH SCORE IS   |\n");
-      printf("|      %s  %d       |\n", high_player, high_score);
-      printf("|                   |\n");
-      printf("=====================\n");
-      printf("   (\\__/) ||\n");
-      printf("   (^--^) ||\n");
-      printf("   /   >> ||\n");
-      printf("  /    )  ||\n");
-    }
-
   } else if(players == 2) {
     setNamePlayer(player1.name, player2.name, &players);
     do {
@@ -493,13 +488,102 @@ int main() {
     } while(n < 6 && player1.score < 3 && player2.score < 3);
     who_win();
   }
+}
 
-  // char choice_word;
-  // do {
-  //   printf("\nADD YOUR OWN WORD (y/n): ");
-  //   scanf(" %c", &choice_word);
-  // } while(tolower(choice_word) != 'y' || tolower(choice_word) != 'n');
-  // add_word("words.txt", &lines);
+int start_menu() {
+  clear();
+  printf("======================\n");
+  printf("|                    |\n");
+  printf("|   GUESS WORD GAME  |\n");
+  printf("|                    |\n");
+  printf("======================\n");
+  printf("|                    |\n");
+  printf("|    1. PLAY GAME    |\n");
+  printf("|                    |\n");
+  printf("|   2. HOW TO PLAY   |\n");
+  printf("|                    |\n");
+  printf("|  3. ADD YOUR WORD  |\n");
+  printf("|                    |\n");
+  printf("======================\n");
+  printf("   (\\__/) ||\n");
+  printf("   (^--^) ||\n");
+  printf("   /   >> ||\n");
+  printf("  /    )  ||\n");
+
+  int menu, check;
+  do {
+    printf("\nCHOOSE: ");
+    fflush(stdin);
+    check = scanf("%d", &menu);
+    while(check != 1) {
+      printf("\n<< ONLY 1 OR 2 OR 3 >>\n");
+      fflush(stdin);
+      printf("\nCHOOSE: ");
+      check = scanf("%d", &menu);
+    }
+    if(menu != 1 && menu != 2 && menu != 3) printf("\n<< ONLY 1 OR 2 OR 3 >>\n");
+  } while(menu != 1 && menu != 2 && menu != 3);
+  return menu;
+}
+
+void how_to_play() {
+  clear();
+  printf("\n                             HOW TO PLAY\n");
+  printf("=====================================================================================\n");
+  printf("\n> GUESS THE WORD ABOUT CODING IN 6 TRIES.\n");
+  printf("\n> EACH GUESS MUST BE A VALID 5-LETTER WORD.\n");
+  printf("\n> THIS SYMBOL \'^\' WILL SHOW UP WHEN YOUR LETTER IS IN THE WORD BUT IN THE WRONG POSITION.\n");
+  printf("\n> IF YOUR LETTER IS IN THE WORD AND IN THE CORRECT POSITION, THE LETTER WILL CHANGE FROM LOWERCASE TO UPPERCASE.\n");
+  printf("\n=====================================================================================\n");
+  printf("\nEXAMPLE\n");
+  printf("\n  p r i n t     \'r\' is in the word but in the wrong position\n");
+  printf("    ^");
+  printf("\n  s c A n f     \'A\' is in the word and in the correct position\n");
+  printf("\n  w h i l e     no letters are correct\n");
+  printf("\n=====================================================================================\n");
+  printf("\nMODE\n");
+  printf("\n  > 1 PLAYER  -  IT'S A SINGLE-PLAYER MODE. IN WHICH YOU HAVE TO GUESS THE WORDS ABOUT CODING.\n");
+  printf("\n  > 2 PLAYERS - IT IS A MODE FOR TWO PLAYERS. TWO PLAYERS TAKE TURNS GUESSING ONE LINE AT A TIME. THE FIRST PERSON TO ANSWER CORRECTLY WILL BE THE ONE WHO GETS POINTS. AND IF ANYONE REACHES THREE POINTS FIRST, THAT PLAYER WILL BE THE WINNER.\n");
+  printf("\n=====================================================================================\n");
+
+  char back;
+  do {
+    fflush(stdin);
+    printf("\n BACK TO MENU (y/n): ");
+    scanf(" %c", &back);
+    if(tolower(back) != 'n' && tolower(back) != 'y') printf("\n<< ONLY Y AND N >>\n");
+  } while(tolower(back) != 'n' && tolower(back) != 'y');
+
+  if(tolower(back) == 'y') {
+    int menu = start_menu();
+    switch(menu) {
+      case 1:
+        play_game();
+        break;
+      case 2:
+        how_to_play();
+        break;
+      case 3:
+        add_word_menu();
+        break;
+    }
+  }
+}
+
+int main() {
+  int menu = start_menu();
+
+  switch(menu) {
+    case 1:
+      play_game();
+      break;
+    case 2:
+      how_to_play();
+      break;
+    case 3:
+      add_word_menu();
+      break;
+  }
 
   return 0;
 }
